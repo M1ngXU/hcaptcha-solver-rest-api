@@ -2,11 +2,11 @@
 name = "hcaptcha-solver-rest-api"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.70"
 cached = { version = "0.42.0", features = ["async_tokio_rt_multi_thread"] }
 image = { version = "0.24.6", default-features = false, features = [
     "jpeg",
@@ -22,7 +22,12 @@ rocket = { version = "0.5.0-rc.3", features = ["json"] }
 serde = { version = "1.0.159", features = ["serde_derive"] }
 serde_json = "1.0.95"
 serde_yaml = "0.9.19"
+shuttle-rocket = { version = "0.14.0" }
+shuttle-runtime = { version = "0.14.0" }
 thiserror = "1.0.40"
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread", "rt"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter", "fmt"] }
+
+[build-dependencies]
+pandoc = "0.8.10"
