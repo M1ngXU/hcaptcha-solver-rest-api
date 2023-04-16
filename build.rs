@@ -1,20 +1,27 @@
 use std::{fs::File, io::Write};
 
-use pandoc::{InputKind, OutputKind, PandocOption, PandocOutput};
+use minify_html::Cfg;
 
 fn main() {
-    let mut pandoc = pandoc::new();
-    pandoc.add_option(PandocOption::Standalone);
-    pandoc.add_option(PandocOption::TitlePrefix(
-        "Hcaptcha Solver Rest API".to_string(),
-    ));
-    pandoc.set_input(InputKind::Pipe(include_str!("README.md").to_string()));
-    pandoc.set_output(OutputKind::Pipe);
-    match pandoc.execute().unwrap() {
-        PandocOutput::ToBuffer(s) => File::create("src/index.html")
-            .unwrap()
-            .write_all(s.as_bytes())
-            .unwrap(),
-        _ => panic!("Output not string"),
-    }
+    let markdown_as_html = ureq::post("https://api.github.com/markdown")
+        .set("Accept", "application/vnd.github+json")
+        .set("X-GitHub-Api-Version", "2022-11-28")
+        .send(std::io::Cursor::new(
+            format!(r#"{{"text": {:?}}}"#, include_str!("README.md")).into_bytes(),
+        ))
+        .unwrap()
+        .into_string()
+        .unwrap();
+    File::create("src/index.html")
+        .unwrap()
+        .write_all(&minify_html::minify(
+            include_str!("src/index.html.template")
+                .replace("MARKDOWN", &markdown_as_html)
+                .as_bytes(),
+            &Cfg {
+                minify_css: true,
+                ..Default::default()
+            },
+        ))
+        .unwrap();
 }

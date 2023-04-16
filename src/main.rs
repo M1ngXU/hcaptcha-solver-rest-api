@@ -4,7 +4,7 @@ use ort::OrtError;
 use rocket::{
     get,
     http::Status,
-    launch, post,
+    post,
     response::{content::RawHtml, Redirect},
     routes,
     serde::json::Json,

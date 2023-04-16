@@ -30,4 +30,5 @@ tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter", "fmt"] }
 
 [build-dependencies]
-pandoc = "0.8.10"
+minify-html = "0.10.8"
+ureq = "2.6.2"
