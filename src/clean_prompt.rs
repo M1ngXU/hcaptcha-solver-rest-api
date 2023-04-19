@@ -2,9 +2,9 @@ use crate::{Error, Result};
 
 pub fn clean_prompt(prompt: &str) -> Result<String> {
     let prompt = prompt.replace('.', "").to_lowercase();
-    let mut label = prompt
+	let mut label = prompt
         .rsplit_once("containing")
-        .map(|(_, l)| l.trim().trim_start_matches('a').trim_start_matches("an"))
+        .map(|(_, l)| l.trim().trim_start_matches("an").trim_start_matches('a'))
         .or_else(|| {
             prompt
                 .split_once("select all")

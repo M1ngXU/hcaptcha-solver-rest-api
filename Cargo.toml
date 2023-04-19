@@ -12,7 +12,6 @@ image = { version = "0.24.6", default-features = false, features = [
     "jpeg",
     "jpeg_rayon",
 ] }
-ndarray = "0.15.6"
 reqwest = "0.11.16"
 rocket = { version = "0.5.0-rc.3", features = ["json"] }
 serde = { version = "1.0.159", features = ["serde_derive"] }
@@ -20,21 +19,13 @@ serde_json = "1.0.95"
 serde_yaml = "0.9.19"
 shuttle-rocket = { version = "0.14.0" }
 shuttle-runtime = "0.14.0"
+smallvec = "1.10.0"
 thiserror = "1.0.40"
 tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread", "rt"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter", "fmt"] }
+tract-onnx = "0.19.8"
 
-[target.'cfg(windows)'.dependencies]
-ort = { version = "1.14.6", default-features = false, features = [
-    "download-binaries",
-    "copy-dylibs",
-] }
-
-[target.'cfg(unix)'.dependencies]
-ort = { version = "1.14.6", default-features = false, features = [
-    "load-dynamic",
-] }
 
 [build-dependencies]
 minify-html = "0.10.8"

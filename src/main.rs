@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 
-use ort::{Environment, LoggingLevel, OrtError};
 use rocket::http::Status;
 use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
@@ -11,6 +10,8 @@ use rocket::{get, post, routes, uri, State};
 use serde::Deserialize;
 use solve::solve;
 use tokio::io::AsyncReadExt;
+use tract_onnx::Onnx;
+use tract_onnx::prelude::TractError;
 
 mod clean_prompt;
 mod get_data;
@@ -24,8 +25,8 @@ pub enum Error {
 	Networking(#[from] reqwest::Error),
 	#[error("Unknown challenge: {0}")]
 	UnknownChallenge(String),
-	#[error("Onnx error (ort): {0}")]
-	Onnx(#[from] OrtError),
+	#[error("Tract error: {0}")]
+	Tract(#[from] TractError),
 	#[error("Bad request: {0}")]
 	BadRequest(String),
 	#[error("Internal Server Error: {0}")]
@@ -43,13 +44,13 @@ struct Data {
 #[post("/v0", data = "<data>")]
 async fn solve_v0(
 	data: Json<Data>,
-	environment: &State<Arc<Environment>>,
+	environment: &State<Arc<Onnx>>,
 ) -> std::result::Result<Json<serde_json::Value>, (Status, String)> {
 	let Data { prompt, images } = data.into_inner();
 	match solve(environment.inner().clone(), &prompt, images).await {
 		Ok(res) => Ok(Json(res)),
 		Err(Error::UnknownChallenge(c)) => Err((Status::NotImplemented, c)),
-		Err(Error::Onnx(e)) => Err((Status::FailedDependency, format!("{e:?}"))),
+		Err(Error::Tract(e)) => Err((Status::FailedDependency, format!("{e:?}"))),
 		Err(Error::Networking(e)) => Err((Status::InternalServerError, format!("{e:?}"))),
 		Err(Error::InternalServerError(s)) => Err((Status::InternalServerError, s)),
 		Err(Error::BadRequest(s)) => Err((Status::BadRequest, s)),
@@ -91,13 +92,7 @@ async fn get_default() -> Redirect {
 async fn rocket() -> shuttle_rocket::ShuttleRocket {
 	let rocket = rocket::build()
 		.mount("/", routes![solve_v0, get_default, get_v0])
-		.manage(Arc::new(
-			Environment::builder()
-				.with_log_level(LoggingLevel::Verbose)
-				.with_name("default")
-				.build()
-				.unwrap(),
-		));
+		.manage(Arc::new(tract_onnx::onnx()));
 
 	Ok(rocket.into())
 }
