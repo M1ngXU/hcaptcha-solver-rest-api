@@ -3,15 +3,13 @@
 use std::sync::Arc;
 
 use rocket::http::Status;
-use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
 use rocket::serde::json::Json;
-use rocket::{get, post, routes, uri, State};
+use rocket::{get, post, routes, State};
 use serde::Deserialize;
 use solve::solve;
-use tokio::io::AsyncReadExt;
-use tract_onnx::Onnx;
 use tract_onnx::prelude::TractError;
+use tract_onnx::Onnx;
 
 mod clean_prompt;
 mod get_data;
@@ -57,41 +55,15 @@ async fn solve_v0(
 	}
 }
 
-#[get("/v0")]
-async fn get_v0() -> RawHtml<String> {
-	if cfg!(debug_assertions) {
-		let mut html = String::new();
-		tokio::fs::File::open("src/index.html")
-			.await
-			.unwrap()
-			.read_to_string(&mut html)
-			.await
-			.unwrap();
-		let mut readme = String::new();
-		tokio::fs::File::open("README.md")
-			.await
-			.unwrap()
-			.read_to_string(&mut readme)
-			.await
-			.unwrap();
-		RawHtml(html.replace("MARKDOWN_CONTENT", &format!("{readme:?}")))
-	} else {
-		RawHtml(include_str!("index.html").replace(
-			"MARKDOWN_CONTENT",
-			&format!("{:?}", include_str!("../README.md")),
-		))
-	}
-}
-
 #[get("/")]
 async fn get_default() -> Redirect {
-	Redirect::temporary(uri!(get_v0))
+	Redirect::permanent("https://hcaptcha-solver.mintlify.app/")
 }
 
 #[shuttle_runtime::main]
 async fn rocket() -> shuttle_rocket::ShuttleRocket {
 	let rocket = rocket::build()
-		.mount("/", routes![solve_v0, get_default, get_v0])
+		.mount("/", routes![solve_v0, get_default])
 		.manage(Arc::new(tract_onnx::onnx()));
 
 	Ok(rocket.into())
