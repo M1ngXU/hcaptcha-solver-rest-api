@@ -1,5 +1,6 @@
 # HCaptcha Solver Rest API
 github: <https://github.com/M1ngXU/hcaptcha-solver-rest-api>
+<br>
 docs: <https://hcaptcha-solver.mintlify.app/>
 
 This rest API solves hcaptcha challenges by using AI image-recognition models from [this](https://github.com/QIN2DIM/hcaptcha-challenger) repository. It doesn't collect any data nor requires some kind of API tokens.
